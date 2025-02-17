@@ -1,0 +1,30 @@
+Acest proiect implementează funcționalitățile de bază ale unui dataplane într-un router software. Fiecare componentă a codului joacă un rol specific 
+în procesarea și rutarea pachetelor IP într-un mediu simulat.
+
+Funcții și Descrierea Lor
+get_best_route(uint32_t destination_ip)
+Această funcție este responsabilă pentru găsirea celei mai bune rute pentru un pachet, bazându-se pe adresa IP de destinație a acestuia. Utilizează 
+căutarea binară pentru a identifica ruta optimă într-un tabel de rutare (rtable) sortat. Funcția compară destinația mascată a pachetului cu prefixele 
+din tabel și alege ruta cu cea mai lungă potrivire a prefixului (LPM - Longest Prefix Match).
+
+get_arp_entry(uint32_t given_ip)
+Această funcție caută în tabelul ARP (arp_table) pentru a găsi o intrare corespunzătoare adresei IP furnizate. Tabelul ARP mapează adresele IP la 
+adresele MAC corespunzătoare. Funcția este esențială pentru determinarea adresei MAC a următoarei hop-uri când un pachet este trimis mai departe în rețea.
+
+compare_function(const void p, const void q)
+Utilizată de qsort pentru a sorta tabelul de rutare. Funcția ordonează intrările bazate pe prefixul de rețea în ordine descrescătoare, ceea ce este util 
+pentru implementarea căutării binare optimizate pentru LPM.
+
+icmp_packet(struct ether_header eth_hdr, uint8_t type, uint32_t interface)
+Aceasta funcție construiește și trimite un pachet ICMP. Este folosită pentru a răspunde la condiții specifice întâlnite în timpul procesării pachetelor,
+ cum ar fi timpul de viață (TTL) expirat sau destinația inaccesibilă. Funcția ajustează antetele IP și Ethernet, calculează checksum-ul și trimite pachetul
+  înapoi pe interfața de rețea specificată.
+
+Funcționalitatea Main-ului
+Funcția main() inițializează tabelele de rutare și ARP, apoi intră într-o buclă infinită în care așteaptă pachete pe orice interfață de rețea. Pentru 
+fiecare pachet primit, verifică dacă este un pachet IPv4 și validează checksum-ul acestuia. Dacă pachetul este valid, determină ruta cea mai bună 
+folosind get_best_route(). Dacă ruta nu este găsită sau pachetul nu poate fi procesat corect (de exemplu, TTL expirat), generează și trimite un 
+răspuns ICMP adecvat. Altfel, pregătește pachetul pentru trimitere, actualizând antetele Ethernet și recalculând checksum-ul IP, 
+înainte de a retransmite pachetul la următoarea destinație.
+
+Am 70 de puncte pe local.
